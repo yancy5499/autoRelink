@@ -1,4 +1,5 @@
 #!venv/Scripts/python.exe
+import os
 import subprocess
 from time import sleep, asctime
 from selenium import webdriver
@@ -50,17 +51,47 @@ def login(url, username, password, service_value):
         else:
             raise Exception
     except:
-        print('error')
+        print('second login error')
     # 登录成功之后就可以关闭浏览器了
     sleep(5)
     browser.close()
 
 
+def user_input():
+    username = None
+    password = None
+    service_value = None
+    keylist = [username, password, service_value]
+    if os.path.exists('key.txt'):
+        print('Password file detected!')
+        with open('key.txt', 'r', encoding='utf-8') as f:
+            for i in range(len(keylist)):
+                keylist[i] = f.readline().split('\n')[0]
+    else:
+        print('''
+        # 输入用户密码登录，密码输入时会隐藏
+        # 运营商选择如下：
+        # 校园网回车就行
+        # 移动@cmcc
+        # 联通@unicom
+        # 电信@telecom
+        ''')
+        keylist[0] = input('username:')
+        keylist[1] = getpass.getpass(prompt='password:')  # 只支持在控制台中使用，在IDE中会看不到
+        keylist[2] = input('service:')
+        with open('key.txt', 'w', encoding='utf-8') as f:
+            for key in keylist:
+                f.write(key)
+                f.write('\n')
+        print('The password file has been saved in key.txt!')
+    return keylist
+
+
 if __name__ == '__main__':
     url = 'http://172.17.0.2/'
     # # 账户密码
-    # username = '替换为学号'
-    # password = '替换为密码'
+    # username = '学号'
+    # password = '密码'
     # # 运营商选择
     # # 校园网填False就行
     # # 移动@cmcc
@@ -68,17 +99,7 @@ if __name__ == '__main__':
     # # 电信@telecom
     # service_value = '@cmcc'
 
-    print('''
-    # 输入用户密码登录，密码输入时会隐藏
-    # 运营商选择如下：
-    # 校园网回车就行
-    # 移动@cmcc
-    # 联通@unicom
-    # 电信@telecom
-    ''')
-    username = input('username:')
-    password = getpass.getpass(prompt='password:')  # 只支持在控制台中使用，在IDE中会看不到
-    service_value = input('service:')
+    username, password, service_value = user_input()
 
     # 判断是否断网
     while True:
@@ -89,7 +110,11 @@ if __name__ == '__main__':
                            shell=True)
         if r.returncode:
             print('relink:', asctime())
-            login(url, username, password, service_value)
+            try:
+                login(url, username, password, service_value)
+            except:
+                input('first login error, Enter any key to exit')
+                break
         else:
             print('linked:', asctime())
         sleep(60 * 3)  # 判断网络的时间间隔
