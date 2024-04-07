@@ -44,14 +44,14 @@ def login(url, username, password, service_value):
             back.click()
             sleep(10)
             # 第二次登录
-            print('back and relink!')
+            print('>>>back and relink!')
             fill(browser, username, password, service_value).submit()
         elif button_name == '注  销':
-            print('relink ok!')
+            print('>>>relink ok!')
         else:
             raise Exception
     except:
-        print('second login error')
+        print('!!!second login error')
     # 登录成功之后就可以关闭浏览器了
     sleep(5)
     browser.close()
@@ -109,12 +109,11 @@ if __name__ == '__main__':
                            stdin=subprocess.PIPE,
                            shell=True)
         if r.returncode:
-            print('relink:', asctime())
+            print('relink start:', asctime())
             try:
                 login(url, username, password, service_value)
             except:
-                input('first login error, Enter any key to exit')
-                break
+                print('!!!first login error')
         else:
             print('linked:', asctime())
         sleep(60 * 3)  # 判断网络的时间间隔
